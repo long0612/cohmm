@@ -1,0 +1,2 @@
+# cohmm
+Continuous observation HMM
