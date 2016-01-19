@@ -8,4 +8,8 @@ function out = logSumExp(x)
 
 x = x(:);
 maxX = max(x);
-out = maxX + log(sum(exp(x-maxX)));
+if maxX == -Inf
+    out = log(sum(exp(x)));
+else
+    out = maxX + log(sum(exp(x-maxX)));
+end
