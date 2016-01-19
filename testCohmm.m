@@ -23,10 +23,7 @@ PSTATES = hmmdecode(seq,TRANS,EMIS);
 
 cohmm.pi = [1; 0];
 cohmm.A = [.85 .15; .1 .9];
-cohmm.B = @(k,l) ...
-    (k==1)*1/6+...
-    (k==2)*(l==1)*7/12+...
-    (k==2)*(l~=1)*1/12;
+cohmm.B = [.17 .16 .17 .16 .17 .17;.6 .08 .08 .08 .08 08];
 
 newCohmm = cohmmBaumWelch(cohmm,seq);
 logProb = cohmmForwBack(newCohmm,seq);

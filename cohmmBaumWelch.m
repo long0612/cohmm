@@ -11,14 +11,9 @@ function newCohmm = cohmmBaumWelch(cohmm, data)
 N = numel(cohmm.pi); % number of states
 T = size(data,2); % number of observations
 
-logAlpha = zeros(N,T);
-for t = 1:T-1
-    logAlpha(:,t) = cohmmForward(cohmm,data(:,1:t));
-end
-logBeta = zeros(N,T);
-for t = T:-1:2
-    logBeta(:,t) = cohmmBackward(cohmm,data(:,t+1:T));
-end
+logAlpha = cohmmForward(cohmm,data);
+
+logBeta = cohmmBackward(cohmm,data);
 
 logEta = zeros(N,N,T-1);
 for t = 1:T-1
