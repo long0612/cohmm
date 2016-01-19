@@ -18,7 +18,7 @@ for t = T:-1:1
         for l = 1:N
             B(l) = log(cohmm.B(l,data(:,t)));
         end
-        logBetaNew(k) = logsumExp(logBeta+log(cohmm.A(:,k))+B);
+        logBetaNew(k) = logSumExp(logBeta+log(cohmm.A(:,k))+B);
     end
     logBeta = logBetaNew;
 end
