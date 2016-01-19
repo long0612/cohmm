@@ -6,5 +6,6 @@ function out = logSumExp(x)
 % University of Illinois
 %
 
+x = x(:);
 maxX = max(x);
 out = maxX + log(sum(exp(x-maxX)));

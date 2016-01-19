@@ -11,32 +11,36 @@ function newCohmm = cohmmBaumWelch(cohmm, data)
 N = numel(cohmm.pi); % number of states
 T = size(data,2); % number of observations
 
-logAlpha = zeros(N,T-1);
+logAlpha = zeros(N,T);
 for t = 1:T-1
     logAlpha(:,t) = cohmmForward(cohmm,data(:,1:t));
 end
-logBeta = zeros(N,T-1);
-for t = T-1:-1:1
+logBeta = zeros(N,T);
+for t = T:-1:2
     logBeta(:,t) = cohmmBackward(cohmm,data(:,t+1:T));
 end
 
-eta = zeros(N,N,T-1);
+logEta = zeros(N,N,T-1);
 for t = 1:T-1
     for k = 1:N
         for l = 1:N
-            eta(k,l,t) = exp(logAlpha(k,t)+log(cohmm.A(k,l))+log(cohmm.B(l,data(:,t+1)))+logBeta(l,t+1));
+            logEta(k,l,t) = logAlpha(k,t)+log(cohmm.A(k,l))+log(cohmm.B(l,data(:,t+1)))+logBeta(l,t+1);
         end
     end
-    eta(k,l,t) = eta(k,l,t)/sum(sum(eta(:,:,t)));
+    logEta(:,:,t) = logEta(:,:,t)-logSumExp(logEta(:,:,t));
 end
 
-gamma = zeros(N,T-1);
+logGamma = zeros(N,T-1);
 for t = 1:T-1
     for k = 1:N
-        gamma(k,t) = sum(eta(k,:,t));
+        logGamma(k,t) = logSumExp(logEta(k,:,t));
     end
 end
 
-newCohmm.pi = gamma(:,1);
-newCohmm.A = sum(eta,3)./repmat(sum(gamma,2),1,N);
+newCohmm.pi = exp(logGamma(:,1));
+for k = 1:N
+    for l = 1:N
+        newCohmm.A(k,l) = exp(logSumExp(logEta(k,l,:)) - logSumExp(logGamma(k,:)));
+    end
+end
 newCohmm.B = cohmm.B;
