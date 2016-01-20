@@ -1,5 +1,5 @@
-function logProb = cohmmForwBack(cohmm,data)
-% logProb = cohmmForwBack(cohmm,data)
+function [logProb,logAlpha,logBeta] = cohmmForwBack(cohmm,data)
+% [logProb,logAlpha,logBeta] = cohmmForwBack(cohmm,data)
 % 
 % Forward-backward algorithm for continuous observation HMM.
 %
@@ -7,8 +7,11 @@ function logProb = cohmmForwBack(cohmm,data)
 % University of Illinois
 %
 
+T = size(data,2); % number of observations
+
 logAlpha = cohmmForward(cohmm,data);
-logProb = logSumExp(logAlpha);
+logBeta = cohmmBackward(cohmm,data);
+logProb = logSumExp(logAlpha(:,T));
 
 
 
