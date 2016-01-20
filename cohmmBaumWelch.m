@@ -14,7 +14,7 @@ N = numel(newCohmm.pi); % number of states
 T = size(data,2); % number of observations
 
 nIter = 0;
-maxIter = 20;
+maxIter = 500;
 while nIter < maxIter
     nIter = nIter + 1;
     
@@ -37,10 +37,15 @@ while nIter < maxIter
 
     logGamma = zeros(N,T);
     for t = 1:T
+        %{
         for k = 1:N
-            %logGamma(k,t) = logSumExp(logEta(k,:,t));
-            logGamma(k,t) = logAlpha(k,t)+logBeta(k,t)-logSumExp(logAlpha(:,t)+logBeta(:,t));
+            logGamma(k,t) = logSumExp(logEta(k,:,t));
         end
+        %}
+        for k = 1:N
+            logGamma(k,t) = logAlpha(k,t)+logBeta(k,t);
+        end
+        logGamma(:,t) = logGamma(:,t)-logSumExp(logGamma(:,t));
     end
 
     % ================
@@ -63,7 +68,7 @@ while nIter < maxIter
         end
     end
     
-    if norm([newCohmm.A(:);newCohmm.pi] - [oldA(:);oldPi]) < 1e-3
+    if norm([newCohmm.A(:);newCohmm.pi] - [oldA(:);oldPi]) < 1e-6
         disp('converged!')
         break;
     end

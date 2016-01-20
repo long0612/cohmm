@@ -7,9 +7,10 @@
 clear all; close all;
 
 addpath(genpath('../voicebox/'))
+rng('default');
 
 %% Sanity check with discrete observation
-TRANS = [.9 .1; .25 .75;];
+TRANS = [.9 .1; .5 .95];
 EMIS = [1/6, 1/6, 1/6, 1/6, 1/6, 1/6;...
 7/12, 1/12, 1/12, 1/12, 1/12, 1/12];
 [seq,states] = hmmgenerate(1000,TRANS,EMIS);
