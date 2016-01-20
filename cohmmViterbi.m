@@ -6,3 +6,7 @@ function state = cohmmViterbi(cohmm, data)
 % Long Le <longle1@illinois.edu>
 % University of Illinois
 %
+
+N = numel(cohmm.pi); % number of states
+T = size(data,2); % number of observations
+
