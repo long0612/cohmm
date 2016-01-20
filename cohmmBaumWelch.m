@@ -47,25 +47,27 @@ while nIter < maxIter
     % ================
     % update the model
     % ================
-    oldPi = newCohmm.pi;
-    oldA = newCohmm.A;
-    
+    prevVec = [newCohmm.pi;newCohmm.A(:)];
     newCohmm.pi = exp(logGamma(:,1));
     for k = 1:N
         for l = 1:N
             newCohmm.A(k,l) = exp(logSumExp(logEta(k,l,:)) - logSumExp(logGamma(k,1:T-1)));
         end
     end
+    currVec = [newCohmm.pi;newCohmm.A(:)];
+    
     % ensure compatible with discrete observation
     if ismatrix(newCohmm.B) && size(data,1) == 1
+        prevVec = [prevVec;newCohmm.B(:)];
         for k = 1:N
             for l = 1:size(newCohmm.B,2)
                 newCohmm.B(k,l) = exp(logSumExp(logGamma(k,:)+log(1*(data==l))) - logSumExp(logGamma(k,:)));
             end
         end
+        currVec = [currVec;newCohmm.B(:)];
     end
     
-    if norm([newCohmm.A(:);newCohmm.pi] - [oldA(:);oldPi]) < tol
+    if norm(currVec - prevVec) < tol
         disp('converged!')
         break;
     end

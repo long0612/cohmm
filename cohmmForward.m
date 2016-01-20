@@ -16,6 +16,6 @@ end
 % induction
 for t = 1:T-1
     for k = 1:N
-        logAlpha(k,t+1) = logSumExp(logAlpha(:,t)+log(cohmm.A(:,k)))+log(cohmm.B(k,data(:,t+1)));
+        logAlpha(k,t+1) = logSumExp( logAlpha(:,t)+log(cohmm.A(:,k)) )+log(cohmm.B(k,data(:,t+1)));
     end
 end
