@@ -4,6 +4,10 @@
 % University of Illinois
 %
 
+clear all; close all;
+
+addpath(genpath('../voicebox/'))
+
 [y,fs] = audioread('../network-paper/genCascade/data/GCW/GCW-A-(17).wav');
 featMFCC = melcepst(y,fs,'Mtaz',3)';
 

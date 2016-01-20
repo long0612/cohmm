@@ -6,7 +6,6 @@
 
 clear all; close all;
 
-addpath(genpath('../voicebox/'))
 rng('default');
 
 % generate hmm seq
