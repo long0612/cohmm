@@ -24,6 +24,7 @@ EMIS_GUESS = [.17 .16 .17 .16 .17 .17;.6 .08 .08 .08 .08 .08];
 cohmm.pi = [1; 0];
 cohmm.A = TRANS_GUESS;
 cohmm.B = EMIS_GUESS;
+cohmm.BType = 'discrete';
 %cohmm.B = EMIS;
 newCohmm = cohmmBaumWelch(cohmm,seq);
 

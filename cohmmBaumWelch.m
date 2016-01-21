@@ -56,8 +56,8 @@ while nIter < maxIter
     end
     currVec = [newCohmm.pi;newCohmm.A(:)];
     
-    % ensure compatible with discrete observation
-    if ismatrix(newCohmm.B) && size(data,1) == 1
+    % update observation distribution under special cases
+    if strcmp(newCohmm.BType, 'discrete')
         prevVec = [prevVec;newCohmm.B(:)];
         for k = 1:N
             for l = 1:size(newCohmm.B,2)
@@ -65,6 +65,7 @@ while nIter < maxIter
             end
         end
         currVec = [currVec;newCohmm.B(:)];
+    % TODO: continuous Gaussian
     end
     
     if norm(currVec - prevVec) < tol
