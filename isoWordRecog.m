@@ -101,14 +101,29 @@ newCohmm = cohmmBaumWelch(cohmm,mulFeatMFCC);
 for k = 3:numel(files)
     [fpath,fname,fext] = fileparts(files(k).name);
     load(sprintf('localLogs/%s_seg.mat',fname),'y','fs','featMFCC');
-    estStates = cohmmViterbi(newCohmm,featMFCC);
-    logProb = cohmmForwBack(newCohmm,featMFCC);
     
     blockSize=256;
     [S,tt,ff] = mSpectrogram(y,fs,blockSize);
+    estStates = cohmmViterbi(newCohmm,featMFCC);
+    logProb = cohmmForwBack(newCohmm,featMFCC);
     
     figure;
     subplot(211); imagesc(tt,ff,S); axis xy
     subplot(212); plot([1:size(estStates,2)]*frameSize/2/fs,estStates); axis tight
     suptitle(sprintf('file %s, logProb is %.4f',fname,logProb))
 end
+
+% try a random input
+[y,fs] = audioread('audio.wav');
+frameSize = 2^floor(log2(0.03*fs));
+featMFCC = melcepst(y,fs,'Mtaz',3,floor(3*log(fs)),frameSize)';
+
+blockSize=256;
+[S,tt,ff] = mSpectrogram(y,fs,blockSize);
+estStates = cohmmViterbi(newCohmm,featMFCC);
+logProb = cohmmForwBack(newCohmm,featMFCC);
+
+figure;
+subplot(211); imagesc(tt,ff,S); axis xy
+subplot(212); plot([1:size(estStates,2)]*frameSize/2/fs,estStates); axis tight
+suptitle(sprintf('logProb is %.4f',logProb))
