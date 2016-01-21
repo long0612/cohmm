@@ -107,5 +107,5 @@ for k = 3:numel(files)
     figure;
     subplot(211); imagesc(tt,ff,S); axis xy
     subplot(212); plot([1:size(estStates,2)]*frameSize/2/fs,estStates); axis tight
-    title(sprintf('logProb is %.4f',logProb))
+    title(sprintf('file %s, logProb is %.4f',fname,logProb))
 end

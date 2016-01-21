@@ -36,7 +36,7 @@ while nIter < maxIter
         for t = 1:T-1
             for k = 1:N
                 for l = 1:N
-                    logEta{j}(k,l,t) = logAlpha{j}(k,t)+log(newCohmm.A(k,l))+log(newCohmm.B(l,data(:,t+1)))+logBeta{j}(l,t+1);
+                    logEta{j}(k,l,t) = logAlpha{j}(k,t)+log(newCohmm.A(k,l))+log(newCohmm.B(l,data{j}(:,t+1)))+logBeta{j}(l,t+1);
                 end
             end
             logEta{j}(:,:,t) = logEta{j}(:,:,t)-logSumExp(logEta{j}(:,:,t));
@@ -67,7 +67,7 @@ while nIter < maxIter
             logGammaMul = zeros(1,E);
             for j = 1:E
                 logEtaMul(j) = logSumExp(logEta{j}(k,l,:));
-                logGammaMul(j) = logSumExp(logGamma{j}(k,1:T-1));
+                logGammaMul(j) = logSumExp(logGamma{j}(k,1:end-1));
             end
             newCohmm.A(k,l) = exp( logSumExp(logEtaMul)-logSumExp(logGammaMul) );
         end
