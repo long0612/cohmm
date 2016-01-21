@@ -11,7 +11,7 @@ function newCohmm = cohmmBaumWelch(cohmm, data)
 newCohmm = cohmm;
 
 N = numel(newCohmm.pi); % number of states
-
+E = numel(data);
 nIter = 0;
 maxIter = 500;
 tol = 1e-6;
@@ -21,11 +21,11 @@ while nIter < maxIter
     % ================
     % Compute alpha, beta, eta, gamma
     % ================
-    logAlpha = cell(1,numel(data));
-    logBeta = cell(1,numel(data));
-    logEta = cell(1,numel(data));
-    logGamma = cell(1,numel(data));
-    for j = 1:numel(data)
+    logAlpha = cell(1,E);
+    logBeta = cell(1,E);
+    logEta = cell(1,E);
+    logGamma = cell(1,E);
+    for j = 1:E
         T = size(data{j},2); % number of observations
         
         logAlpha{j} = cohmmForward(newCohmm,data{j});
@@ -55,28 +55,44 @@ while nIter < maxIter
     % ================
     % update the model
     % ================
-    prevVec = [newCohmm.pi;newCohmm.A(:)];
-    newCohmm.pi = exp(logGamma(:,1));
+    prevIter = [];
+    currIter = [];
+    
+    %newCohmm.pi = exp(logGamma(:,1));
+    
+    prevIter = [prevIter;newCohmm.A(:)];
     for k = 1:N
         for l = 1:N
-            newCohmm.A(k,l) = exp(logSumExp(logEta(k,l,:)) - logSumExp(logGamma(k,1:T-1)));
+            logEtaMul = zeros(1,E);
+            logGammaMul = zeros(1,E);
+            for j = 1:E
+                logEtaMul(j) = logSumExp(logEta{j}(k,l,:));
+                logGammaMul(j) = logSumExp(logGamma{j}(k,1:T-1));
+            end
+            newCohmm.A(k,l) = exp( logSumExp(logEtaMul)-logSumExp(logGammaMul) );
         end
     end
-    currVec = [newCohmm.pi;newCohmm.A(:)];
+    currIter = [currIter;newCohmm.A(:)];
     
     % update observation distribution under special cases
     if isfield(newCohmm,'BType') && strcmp(newCohmm.BType, 'discrete')
-        prevVec = [prevVec;newCohmm.B(:)];
+        prevIter = [prevIter;newCohmm.B(:)];
         for k = 1:N
             for l = 1:size(newCohmm.B,2)
-                newCohmm.B(k,l) = exp(logSumExp(logGamma(k,:)+log(1*(data==l))) - logSumExp(logGamma(k,:)));
+                logGammaIndMul = zeros(1,E);
+                logGammaMul = zeros(1,E);
+                for j = 1:E
+                    logGammaIndMul(j) = logSumExp(logGamma{j}(k,:)+log(1*(data{j}==l)));
+                    logGammaMul(j) = logSumExp(logGamma{j}(k,:));
+                end
+                newCohmm.B(k,l) = exp( logSumExp(logGammaIndMul)-logSumExp(logGammaMul) );
             end
         end
-        currVec = [currVec;newCohmm.B(:)];
+        currIter = [currIter;newCohmm.B(:)];
     % TODO: continuous Gaussian
     end
     
-    if norm(currVec - prevVec) < tol
+    if norm(currIter - prevIter) < tol
         disp('converged!')
         break;
     end

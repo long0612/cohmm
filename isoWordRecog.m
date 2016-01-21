@@ -55,8 +55,8 @@ for k = 14:numel(files)
     close;
 end
 %% inspect data for parameters
-allFeatMFCC = cell(nS,numel(files)-2);
 allLen = zeros(nS,numel(files)-2);
+allFeatMFCC = cell(nS,numel(files)-2);
 for k = 3:numel(files)
     [fpath,fname,fext] = fileparts(files(k).name);
     load(sprintf('localLogs/%s_seg.mat',fname),'states','featMFCC');
@@ -90,14 +90,13 @@ funStr(end) = ';';
 eval(['cohmm.B = ' funStr]);
 
 % optimize the model
-newCohmm = cohmm;
+mulFeatMFCC = cell(1,numel(files)-2);
 for k = 3:numel(files)
-    disp(files(k).name)
-    
     [fpath,fname,fext] = fileparts(files(k).name);
     load(sprintf('localLogs/%s_seg.mat',fname),'featMFCC');
-    newCohmm = cohmmBaumWelch(newCohmm,featMFCC);
+    mulFeatMFCC{k-2} = featMFCC;
 end
+newCohmm = cohmmBaumWelch(cohmm,mulFeatMFCC);
 
 for k = 3:numel(files)
     [fpath,fname,fext] = fileparts(files(k).name);
