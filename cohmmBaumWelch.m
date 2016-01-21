@@ -57,7 +57,7 @@ while nIter < maxIter
     currVec = [newCohmm.pi;newCohmm.A(:)];
     
     % update observation distribution under special cases
-    if strcmp(newCohmm.BType, 'discrete')
+    if isfield(newCohmm,'BType') && strcmp(newCohmm.BType, 'discrete')
         prevVec = [prevVec;newCohmm.B(:)];
         for k = 1:N
             for l = 1:size(newCohmm.B,2)
