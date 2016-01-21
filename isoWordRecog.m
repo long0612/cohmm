@@ -20,10 +20,16 @@ featMFCC = melcepst(y,fs,'Mtaz',3,floor(3*log(fs)),frameSize)';
 %figure; imagesc([1:size(featMFCC,2)]*frameSize/2/fs,[1:size(featMFCC,1)],featMFCC);
 figure; imagesc(featMFCC);
 
-states = ones(1,size(featMFCC,2)); p(1) = 1-1/(numel(1:40)+numel(189:size(featMFCC,2)));
-states(40:127) = 2; p(2) = 1-1/numel(40:127);
-states(128:166) = 3; p(3) = 1-1/numel(128:166);
-states(167:188) = 4; p(4) = 1-1/numel(167:188);
+states = ones(1,size(featMFCC,2));
+states(40:127) = 2;
+states(128:166) = 3;
+states(167:188) = 4;
+
+[len,first,last] = SplitVec(states, [], 'length','first','last');
+p = zeros(4,1);
+for k = 1:4
+    p(k) = 1-1/len(k);
+end
 
 figure; hold on;
 col = 'kbrg';
@@ -54,9 +60,9 @@ eval(['cohmm.B = ' funStr]);
 
 % optimize the model
 newCohmm = cohmmBaumWelch(cohmm,featMFCC);
-states = cohmmViterbi(newCohmm,featMFCC);
+estStates = cohmmViterbi(newCohmm,featMFCC);
 logProb = cohmmForwBack(newCohmm,featMFCC);
 
 figure;
 subplot(211); imagesc(tt,ff,S); axis xy
-subplot(212); plot([1:size(states,2)]*frameSize/2/fs,states); axis tight
+subplot(212); plot([1:size(estStates,2)]*frameSize/2/fs,estStates); axis tight
