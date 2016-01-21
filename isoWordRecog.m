@@ -100,12 +100,15 @@ newCohmm = cohmmBaumWelch(cohmm,mulFeatMFCC);
 
 for k = 3:numel(files)
     [fpath,fname,fext] = fileparts(files(k).name);
-    load(sprintf('localLogs/%s_seg.mat',fname),'featMFCC');
+    load(sprintf('localLogs/%s_seg.mat',fname),'y','fs','featMFCC');
     estStates = cohmmViterbi(newCohmm,featMFCC);
     logProb = cohmmForwBack(newCohmm,featMFCC);
+    
+    blockSize=256;
+    [S,tt,ff] = mSpectrogram(y,fs,blockSize);
     
     figure;
     subplot(211); imagesc(tt,ff,S); axis xy
     subplot(212); plot([1:size(estStates,2)]*frameSize/2/fs,estStates); axis tight
-    title(sprintf('file %s, logProb is %.4f',fname,logProb))
+    suptitle(sprintf('file %s, logProb is %.4f',fname,logProb))
 end
