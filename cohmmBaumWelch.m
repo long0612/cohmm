@@ -11,7 +11,6 @@ function newCohmm = cohmmBaumWelch(cohmm, data)
 newCohmm = cohmm;
 
 N = numel(newCohmm.pi); % number of states
-T = size(data,2); % number of observations
 
 nIter = 0;
 maxIter = 500;
@@ -22,26 +21,35 @@ while nIter < maxIter
     % ================
     % Compute alpha, beta, eta, gamma
     % ================
-    logAlpha = cohmmForward(newCohmm,data);
-
-    logBeta = cohmmBackward(newCohmm,data);
-
-    logEta = zeros(N,N,T-1);
-    for t = 1:T-1
-        for k = 1:N
-            for l = 1:N
-                logEta(k,l,t) = logAlpha(k,t)+log(newCohmm.A(k,l))+log(newCohmm.B(l,data(:,t+1)))+logBeta(l,t+1);
+    logAlpha = cell(1,numel(data));
+    logBeta = cell(1,numel(data));
+    logEta = cell(1,numel(data));
+    logGamma = cell(1,numel(data));
+    for j = 1:numel(data)
+        T = size(data{j},2); % number of observations
+        
+        logAlpha{j} = cohmmForward(newCohmm,data{j});
+        
+        logBeta{j} = cohmmBackward(newCohmm,data{j});
+    
+        logEta{j} = zeros(N,N,T-1);
+        for t = 1:T-1
+            for k = 1:N
+                for l = 1:N
+                    logEta{j}(k,l,t) = logAlpha{j}(k,t)+log(newCohmm.A(k,l))+log(newCohmm.B(l,data(:,t+1)))+logBeta{j}(l,t+1);
+                end
             end
+            logEta{j}(:,:,t) = logEta{j}(:,:,t)-logSumExp(logEta{j}(:,:,t));
         end
-        logEta(:,:,t) = logEta(:,:,t)-logSumExp(logEta(:,:,t));
-    end
 
-    logGamma = zeros(N,T);
-    for t = 1:T
-        for k = 1:N
-            logGamma(k,t) = logAlpha(k,t)+logBeta(k,t);
+        logGamma{j} = zeros(N,T);
+        for t = 1:T
+            for k = 1:N
+                logGamma{j}(k,t) = logAlpha{j}(k,t)+logBeta{j}(k,t);
+            end
+            logGamma{j}(:,t) = logGamma{j}(:,t)-logSumExp(logGamma{j}(:,t));
         end
-        logGamma(:,t) = logGamma(:,t)-logSumExp(logGamma(:,t));
+    
     end
 
     % ================

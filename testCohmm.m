@@ -26,7 +26,7 @@ cohmm.A = TRANS_GUESS;
 cohmm.B = EMIS_GUESS;
 cohmm.BType = 'discrete';
 %cohmm.B = EMIS;
-newCohmm = cohmmBaumWelch(cohmm,seq);
+newCohmm = cohmmBaumWelch(cohmm,{seq});
 
 % ==============
 % test forward-backward alg
