@@ -66,12 +66,14 @@ for k = 3:numel(files)
     
     % manual segmentation
     states = ones(1,size(featMFCC,2));
-    vals = zeros(1,nS);
+    if ~exist(sprintf('localLogs/%s_seg.mat',fname),'file') == 2
+        vals = zeros(1,nS);
+    else
+        load(sprintf('localLogs/%s_seg.mat',fname),'vals');
+    end
     firstIdx = 1;
     for l = 1:nS
-        if exist(sprintf('localLogs/%s_seg.mat',fname),'file') == 2
-            load(sprintf('localLogs/%s_seg.mat',fname),'vals');
-        else
+        if ~(exist(sprintf('localLogs/%s_seg.mat',fname),'file') == 2)
             vals(l) = input(sprintf('Input state %d last value in seconds: ',l));
         end
         lastIdx = round(vals(l)*fs/(frameSize/2));
