@@ -97,7 +97,9 @@ for k = 3:numel(files)
     mulFeatMFCC{k-2} = featMFCC;
 end
 newCohmm = cohmmBaumWelch(cohmm,mulFeatMFCC);
+save('localLogs/newCohmm.mat','newCohmm');
 
+%% Verify trained model
 for k = 3:numel(files)
     [fpath,fname,fext] = fileparts(files(k).name);
     load(sprintf('localLogs/%s_seg.mat',fname),'y','fs','featMFCC');
@@ -114,7 +116,7 @@ for k = 3:numel(files)
 end
 
 % try a random input
-[y,fs] = audioread('audio.wav');
+[y,fs] = audioread('data/audio.wav');
 frameSize = 2^floor(log2(0.03*fs));
 featMFCC = melcepst(y,fs,'Mtaz',3,floor(3*log(fs)),frameSize)';
 
