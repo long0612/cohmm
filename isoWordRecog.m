@@ -110,7 +110,7 @@ for k = 3:numel(files)
     figure;
     subplot(211); imagesc(tt,ff,S); axis xy
     subplot(212); plot([1:size(estStates,2)]*frameSize/2/fs,estStates); axis tight
-    suptitle(sprintf('file %s, logProb is %.4f',fname,logProb))
+    suptitle(sprintf('file %s, normalized logProb is %.4f',fname,logProb/size(featMFCC,2)))
 end
 
 % try a random input
@@ -126,4 +126,4 @@ logProb = cohmmForwBack(newCohmm,featMFCC);
 figure;
 subplot(211); imagesc(tt,ff,S); axis xy
 subplot(212); plot([1:size(estStates,2)]*frameSize/2/fs,estStates); axis tight
-suptitle(sprintf('logProb is %.4f',logProb))
+suptitle(sprintf('normalized logProb is %.4f',logProb/size(featMFCC,2)))
