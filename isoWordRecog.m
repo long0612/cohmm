@@ -123,28 +123,30 @@ eval(['cohmm.B = ' funStr]);
 
 % optimize the model
 mulFeatMFCC = cell(1,numel(files)-2);
+mulY = cell(1,numel(files)-2);
+mulFs = zeros(1,numel(files)-2);
 for k = 3:numel(files)
     [fpath,fname,fext] = fileparts(files(k).name);
-    load(sprintf('localLogs/%s_seg.mat',fname),'featMFCC');
+    load(sprintf('localLogs/%s_seg.mat',fname),'featMFCC','y','fs');
     mulFeatMFCC{k-2} = featMFCC;
+    mulY{k-2} = y;
+    mulFs{k-2} = fs;
 end
 newCohmm = cohmmBaumWelch(cohmm,mulFeatMFCC);
 %save('localLogs/newCohmm2.mat','newCohmm');
 
 %% Verify trained model
-for k = 3:numel(files)
-    [fpath,fname,fext] = fileparts(files(k).name);
-    load(sprintf('localLogs/%s_seg.mat',fname),'y','fs','featMFCC');
-    frameSize = 2^floor(log2(0.03*fs));
+parfor k = 1:size(mulFeatMFCC,2)
+    frameSize = 2^floor(log2(0.03*mulFs{k}));
     
-    estStates = cohmmViterbi(newCohmm,featMFCC);
-    logProb = cohmmForwBack(newCohmm,featMFCC);
-    [S,tt,ff] = mSpectrogram(y,fs,blockSize);
+    estStates = cohmmViterbi(newCohmm,mulFeatMFCC{k});
+    logProb = cohmmForwBack(newCohmm,mulFeatMFCC{k});
+    [S,tt,ff] = mSpectrogram(mulY{k},mulFs{k},blockSize);
     
     figure;
     subplot(211); imagesc(tt,ff,S); axis xy
-    subplot(212); plot([1:size(estStates,2)]*frameSize/2/fs,estStates); axis tight
-    suptitle(sprintf('file %s, normalized logProb is %.4f',fname,logProb/size(featMFCC,2)))
+    subplot(212); plot([1:size(estStates,2)]*frameSize/2/mulFs{k},estStates); axis tight
+    suptitle(sprintf('file %s, normalized logProb is %.4f',fname,logProb/size(estStates,2)))
 end
 
 % try a random input
