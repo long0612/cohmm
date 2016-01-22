@@ -46,9 +46,10 @@ files = dir('data/GCWA/');
 nS = 5;
 blockSize=256;
 
-for k = 10:numel(files)
-    figure('units','normalized','outerposition',[0 0 1 1]);
+for k = 3:numel(files)
+    [fpath,fname,fext] = fileparts(files(k).name);
     fprintf(1,'%s at %d\n',files(k).name,k);
+    figure('units','normalized','outerposition',[0 0 1 1]);
     
     %[y,fs] = audioread(['../network-paper/genCascade/data/GCW/' files(k).name]);
     [y,fs] = audioread(['data/GCWA/' files(k).name]);
@@ -57,7 +58,9 @@ for k = 10:numel(files)
     subplot(311); imagesc(tt,ff,S); axis xy
     
     frameSize = 2^floor(log2(0.03*fs));
-    featMFCC = melcepst(y,fs,'Mtaz',3,floor(3*log(fs)),frameSize)';
+    cepstCoef = melcepst(y,fs,'Mtaz',16,floor(3*log(fs)),frameSize);
+    [pcaCoeff, pcaScore] = pca(cepstCoef);
+    featMFCC = (pcaScore(:,1:3)*pcaCoeff(1:3,1:3)'+repmat(mean(cepstCoef(:,1:3)),size(cepstCoef,1),1))';
     %figure; imagesc([1:size(featMFCC,2)]*frameSize/2/fs,[1:size(featMFCC,1)],featMFCC);
     subplot(312); imagesc(featMFCC);
     
@@ -66,10 +69,14 @@ for k = 10:numel(files)
     vals = zeros(1,nS);
     firstIdx = 1;
     for l = 1:nS
-        vals(l) = input(sprintf('Input state %d last value in seconds: ',l));
+        if exist(sprintf('localLogs/%s_seg.mat',fname),'file') == 2
+            load(sprintf('localLogs/%s_seg.mat',fname),'vals');
+        else
+            vals(l) = input(sprintf('Input state %d last value in seconds: ',l));
+        end
         lastIdx = round(vals(l)*fs/(frameSize/2));
         states(firstIdx:lastIdx) = l;
-        
+
         firstIdx = lastIdx + 1;
     end
     
@@ -80,7 +87,6 @@ for k = 10:numel(files)
     end
     xlabel('1');ylabel('2');zlabel('3')
     
-    [fpath,fname,fext] = fileparts(files(k).name);
     save(sprintf('localLogs/%s_seg.mat',fname),'vals','y','fs','frameSize','states','featMFCC');
     
     input('Press enter to continue');
@@ -130,7 +136,7 @@ for k = 3:numel(files)
     load(sprintf('localLogs/%s_seg.mat',fname),'featMFCC','y','fs');
     mulFeatMFCC{k-2} = featMFCC;
     mulY{k-2} = y;
-    mulFs{k-2} = fs;
+    mulFs(k-2) = fs;
 end
 newCohmm = cohmmBaumWelch(cohmm,mulFeatMFCC);
 %save('localLogs/newCohmm2.mat','newCohmm');
