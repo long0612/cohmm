@@ -25,7 +25,7 @@ while nIter < maxIter
     logBeta = cell(1,E);
     logEta = cell(1,E);
     logGamma = cell(1,E);
-    for j = 1:E
+    parfor j = 1:E
         T = size(data{j},2); % number of observations
         
         logAlpha{j} = cohmmForward(newCohmm,data{j});

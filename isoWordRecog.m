@@ -8,19 +8,51 @@ clear all; close all;
 
 addpath(genpath('../voicebox/'))
 addpath(genpath('../node-paper/'))
+addpath(genpath('../jsonlab/'))
+addpath(genpath('../V1_1_urlread2'));
+addpath(genpath('../sas-clientLib/src'))
 
+%servAddr = '128.32.33.227';
+servAddr = 'acoustic.ifp.illinois.edu';
+DB = 'publicDb';
+USER = 'nan';
+PWD = 'publicPwd';
+DATA = 'data';
+EVENT = 'event';
 
-%% Read all data
-files = dir('../network-paper/genCascade/data/GCW/');
-nS = 5;
-
-for k = 14:numel(files)
-    figure('units','normalized','outerposition',[0 0 1 1]);
-    disp(files(k).name)
+%% Use remote service data
+q.t1 = datenum(2015,12,01,00,00,00); q.t2 = datenum(2016,01,20,00,00,00);
+q.tag = 'GCWA';
+events = IllQuery(servAddr, DB, USER, PWD, EVENT, q);
+for l = 1:numel(events)
+    disp(l);
     
-    [y,fs] = audioread(['../network-paper/genCascade/data/GCW/' files(k).name]);
+    % download the binary data
+    data = IllGridGet(servAddr, DB, USER, PWD, DATA, events{l}.filename);
+    try
+        [y, header] = wavread_char(data);
+        audiowrite(['data/GCWA/' events{l}.filename],y,double(header.sampleRate));
+    catch e
+        disp('missing binary data')
+        %resp = IllColDelete(servAddr, DB, USER, PWD, EVENT, events{l}.filename);
+        %disp(resp);
+        continue;
+    end
+end
+%% Read all data
+%files = dir('../network-paper/genCascade/data/GCW/');
+files = dir('data/GCWA/');
+
+nS = 5;
+blockSize=256;
+
+for k = 10:numel(files)
+    figure('units','normalized','outerposition',[0 0 1 1]);
+    fprintf(1,'%s at %d\n',files(k).name,k);
+    
+    %[y,fs] = audioread(['../network-paper/genCascade/data/GCW/' files(k).name]);
+    [y,fs] = audioread(['data/GCWA/' files(k).name]);
     %figure; plot([1:size(y,1)]/fs,abs(y));
-    blockSize=256;
     [S,tt,ff] = mSpectrogram(y,fs,blockSize);
     subplot(311); imagesc(tt,ff,S); axis xy
     
@@ -97,17 +129,16 @@ for k = 3:numel(files)
     mulFeatMFCC{k-2} = featMFCC;
 end
 newCohmm = cohmmBaumWelch(cohmm,mulFeatMFCC);
-save('localLogs/newCohmm.mat','newCohmm');
+%save('localLogs/newCohmm.mat','newCohmm');
 
 %% Verify trained model
 for k = 3:numel(files)
     [fpath,fname,fext] = fileparts(files(k).name);
     load(sprintf('localLogs/%s_seg.mat',fname),'y','fs','featMFCC');
     
-    blockSize=256;
-    [S,tt,ff] = mSpectrogram(y,fs,blockSize);
     estStates = cohmmViterbi(newCohmm,featMFCC);
     logProb = cohmmForwBack(newCohmm,featMFCC);
+    [S,tt,ff] = mSpectrogram(y,fs,blockSize);
     
     figure;
     subplot(211); imagesc(tt,ff,S); axis xy
@@ -120,7 +151,6 @@ end
 frameSize = 2^floor(log2(0.03*fs));
 featMFCC = melcepst(y,fs,'Mtaz',3,floor(3*log(fs)),frameSize)';
 
-blockSize=256;
 [S,tt,ff] = mSpectrogram(y,fs,blockSize);
 estStates = cohmmViterbi(newCohmm,featMFCC);
 logProb = cohmmForwBack(newCohmm,featMFCC);
