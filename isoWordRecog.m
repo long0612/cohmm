@@ -141,19 +141,20 @@ for k = 3:numel(files)
     mulFs(k-2) = fs;
 end
 newCohmm = cohmmBaumWelch(cohmm,mulFeatMFCC);
-%save('localLogs/newCohmm2.mat','newCohmm');
+%save('localLogs/newCohmm.mat','newCohmm');
 
 %% Verify trained model
-parfor k = 1:size(mulFeatMFCC,2)
-    frameSize = 2^floor(log2(0.03*mulFs{k}));
+for k = 1:size(mulFeatMFCC,2)
+    [fpath,fname,fext] = fileparts(files(k).name);
+    frameSize = 2^floor(log2(0.03*mulFs(k)));
     
     estStates = cohmmViterbi(newCohmm,mulFeatMFCC{k});
     logProb = cohmmForwBack(newCohmm,mulFeatMFCC{k});
-    [S,tt,ff] = mSpectrogram(mulY{k},mulFs{k},blockSize);
+    [S,tt,ff] = mSpectrogram(mulY{k},mulFs(k),blockSize);
     
     figure;
     subplot(211); imagesc(tt,ff,S); axis xy
-    subplot(212); plot([1:size(estStates,2)]*frameSize/2/mulFs{k},estStates); axis tight
+    subplot(212); plot([1:size(estStates,2)]*frameSize/2/mulFs(k),estStates); axis tight
     suptitle(sprintf('file %s, normalized logProb is %.4f',fname,logProb/size(estStates,2)))
 end
 
