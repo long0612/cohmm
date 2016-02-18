@@ -122,9 +122,9 @@ cohmm.pi = [1;0;0;0;0];
 cohmm.A = [p(1) 1-p(1) 0 0 0; 0 p(2) 1-p(2) 0 0; 0 0 p(3) 1-p(3) 0; 0 0 0 p(4) 1-p(4); 1-p(5) 0 0 0 p(5)];
 funStr = '@(k,feat) ';
 for k = 1:nS
-    funStr = [funStr sprintf('(k==%d)*mvnpdf(feat,',k)];
-    funStr = [funStr sprintf('[%.4f;%.4f;%.4f],',mu(:,k))];
-    funStr = [funStr sprintf('[%.4f %.4f %.4f;%.4f %.4f %.4f;%.4f %.4f %.4f])+',K(:,:,k))];
+    funStr = [funStr sprintf('(k==%d)*mvnpdf(feat'',',k)];
+    funStr = [funStr sprintf('[%.4f %.4f %.4f],',mu(:,k))];
+    funStr = [funStr sprintf('[%.4f %.4f %.4f;%.4f %.4f %.4f;%.4f %.4f %.4f])+',K(:,:,k)')];
 end
 funStr(end) = ';';
 eval(['cohmm.B = ' funStr]);
