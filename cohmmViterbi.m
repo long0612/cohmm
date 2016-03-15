@@ -1,4 +1,4 @@
-function states = cohmmViterbi(cohmm, data)
+function [states,maxLogDelta] = cohmmViterbi(cohmm, data)
 % state = cohmmViterbi(cohmm, data)
 % 
 % Viterbi algorithm for continuous observation HMM.
@@ -25,7 +25,7 @@ for t = 1:T-1
 end
 
 % termination
-[~,idx] = max(logDelta(:,T));
+[maxLogDelta,idx] = max(logDelta(:,T));
 
 % backtracking
 states(T) = idx;
