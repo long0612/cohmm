@@ -54,7 +54,13 @@ mean(states==likelystates)
 cohmm.pi = [1; 0];
 cohmm.A = TRANS;
 cohmm.B = EMIS;
-mEstStates = cohmmViterbi(cohmm, seq);
+[mEstStates,maxLogDelta] = cohmmViterbi(cohmm, seq);
 mean(states==mEstStates)
 
 figure; hold on; plot(likelystates,'b'); plot(mEstStates,'r')
+
+% ============== 
+% test eval alg
+% ============== 
+logProb = cohmmEval(cohmm,mEstStates,seq);
+norm(logProb - maxLogDelta)
