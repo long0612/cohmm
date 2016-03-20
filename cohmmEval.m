@@ -1,7 +1,7 @@
-function logProb = cohmmEval(cohmm,states,data)
+function nLogProb = cohmmEval(cohmm,data,states)
 % logProb = cohmmEval(cohmm,states,data)
 % 
-% Evaluate the log prob of a particular realization of state and data
+% Evaluate the normalized log prob of a particular realization of state and data
 %
 % Long Le <longle1@illinois.edu>
 % University of Illinois
@@ -18,4 +18,4 @@ for t = 1:T-1
     logProbAll(t+1) = logProbAll(t)+log(cohmm.A(states(t),states(t+1)))+log(cohmm.B(states(t+1),data(:,t+1)));
 end
 
-logProb = logProbAll(T);
+nLogProb = logProbAll(T)/T;

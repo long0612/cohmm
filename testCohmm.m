@@ -62,5 +62,5 @@ figure; hold on; plot(likelystates,'b'); plot(mEstStates,'r')
 % ============== 
 % test eval alg
 % ============== 
-logProb = cohmmEval(cohmm,mEstStates,seq);
+logProb = cohmmEval(cohmm,seq,mEstStates);
 norm(logProb - maxLogDelta)
