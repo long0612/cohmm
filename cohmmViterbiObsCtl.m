@@ -13,7 +13,11 @@ T = numel(data); % number of observations
 % init
 logDelta = zeros(N,T);
 for k = 1:N
-    bMax = max( cohmm.B(k,data{1}) );
+    if numel(data{1}) == 0
+        bMax = cohmm.B0(k); % no observation prob
+    else
+        bMax = max( cohmm.B(k,data{1}) );
+    end
     logDelta(k,1) = log(cohmm.pi(k))+log(bMax);
 end
 psi = zeros(N,T);
@@ -21,7 +25,11 @@ psi = zeros(N,T);
 % recursion
 for t = 1:T-1
     for k = 1:N
-        bMax = max( cohmm.B(k,data{t+1}) );
+        if numel(data{t+1}) == 0
+            bMax = cohmm.B0(k);
+        else
+            bMax = max( cohmm.B(k,data{t+1}) );
+        end
         [logDelta(k,t+1),psi(k,t+1)] = max( logDelta(:,t)+log(cohmm.A(:,k))+log(bMax) );
     end
 end
